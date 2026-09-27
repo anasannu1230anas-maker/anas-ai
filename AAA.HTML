@@ -1,0 +1,852 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANAS AI Chat</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at top left,#1d2745 0%,transparent 35%),
+    radial-gradient(circle at bottom right,#32184d 0%,transparent 35%),
+    #080b14;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+
+.app{
+  width:100%;
+  max-width:1000px;
+  height:92vh;
+  min-height:550px;
+  display:flex;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:25px;
+  background:rgba(12,16,29,.88);
+  box-shadow:0 25px 80px rgba(0,0,0,.5);
+  backdrop-filter:blur(20px);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  padding:20px;
+  border-right:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.025);
+  display:flex;
+  flex-direction:column;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:21px;
+  font-weight:bold;
+  margin-bottom:25px;
+}
+
+.logo-icon{
+  width:42px;
+  height:42px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#7c5cff,#19d3ff);
+  font-size:22px;
+  box-shadow:0 8px 25px rgba(71,126,255,.3);
+}
+
+.new-chat{
+  border:0;
+  padding:13px;
+  border-radius:13px;
+  color:white;
+  background:linear-gradient(135deg,#7057ff,#367dff);
+  cursor:pointer;
+  font-weight:bold;
+  transition:.2s;
+}
+
+.new-chat:hover{
+  transform:translateY(-2px);
+}
+
+.side-title{
+  margin-top:25px;
+  margin-bottom:10px;
+  color:#8992a8;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.info{
+  color:#aab2c5;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.sidebar-bottom{
+  margin-top:auto;
+}
+
+.status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#9da7bd;
+  font-size:13px;
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#34e27a;
+  box-shadow:0 0 12px #34e27a;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.header{
+  height:75px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 22px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.ai-name{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.ai-avatar{
+  width:42px;
+  height:42px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  border-radius:50%;
+  background:linear-gradient(135deg,#16c7ff,#7a4cff);
+  font-size:21px;
+}
+
+.ai-name h2{
+  font-size:16px;
+}
+
+.ai-name span{
+  color:#7f8aa2;
+  font-size:12px;
+}
+
+.clear{
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);
+  color:#c5ccdc;
+  padding:9px 13px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.clear:hover{
+  background:rgba(255,255,255,.1);
+}
+
+/* CHAT */
+.chat{
+  flex:1;
+  overflow-y:auto;
+  padding:25px;
+  scroll-behavior:smooth;
+}
+
+.welcome{
+  text-align:center;
+  max-width:600px;
+  margin:55px auto 35px;
+}
+
+.welcome-icon{
+  font-size:55px;
+  margin-bottom:15px;
+  animation:float 3s ease-in-out infinite;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+
+.welcome h1{
+  font-size:32px;
+  margin-bottom:10px;
+}
+
+.welcome p{
+  color:#929cb3;
+  line-height:1.6;
+}
+
+/* MESSAGES */
+.message{
+  display:flex;
+  gap:12px;
+  margin:18px 0;
+  animation:appear .25s ease;
+}
+
+@keyframes appear{
+  from{
+    opacity:0;
+    transform:translateY(8px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.message.user{
+  justify-content:flex-end;
+}
+
+.message.user .bubble{
+  background:linear-gradient(135deg,#5e4bdb,#326fe8);
+  border-bottom-right-radius:4px;
+}
+
+.message.ai .bubble{
+  background:rgba(255,255,255,.065);
+  border:1px solid rgba(255,255,255,.08);
+  border-bottom-left-radius:4px;
+}
+
+.avatar{
+  flex:0 0 35px;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#20273a;
+  font-size:17px;
+}
+
+.message.user .avatar{
+  order:2;
+  background:#5548bc;
+}
+
+.bubble{
+  max-width:min(75%,650px);
+  padding:12px 15px;
+  line-height:1.55;
+  font-size:14px;
+  border-radius:16px;
+  white-space:pre-wrap;
+}
+
+/* TYPING */
+.typing{
+  display:flex;
+  gap:4px;
+  padding:13px 16px;
+}
+
+.typing span{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#9da7bd;
+  animation:typing 1.2s infinite;
+}
+
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+
+@keyframes typing{
+  0%,60%,100%{transform:translateY(0);opacity:.4}
+  30%{transform:translateY(-5px);opacity:1}
+}
+
+/* SUGGESTIONS */
+.suggestions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:0 25px 12px;
+}
+
+.suggestion{
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.045);
+  color:#c4ccdc;
+  padding:9px 12px;
+  border-radius:20px;
+  cursor:pointer;
+  font-size:12px;
+  transition:.2s;
+}
+
+.suggestion:hover{
+  background:rgba(100,100,255,.15);
+  border-color:rgba(120,110,255,.4);
+  transform:translateY(-1px);
+}
+
+/* INPUT */
+.input-area{
+  padding:15px 20px 20px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.input-box{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  padding:10px;
+  border-radius:17px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.1);
+}
+
+#input{
+  flex:1;
+  resize:none;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:white;
+  font-size:14px;
+  min-height:25px;
+  max-height:120px;
+  padding:7px;
+}
+
+#input::placeholder{
+  color:#69738a;
+}
+
+.send{
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:12px;
+  background:linear-gradient(135deg,#7057ff,#248dff);
+  color:white;
+  font-size:19px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.send:hover{
+  transform:scale(1.05);
+}
+
+.send:active{
+  transform:scale(.95);
+}
+
+.hint{
+  text-align:center;
+  color:#5f687c;
+  font-size:10px;
+  margin-top:8px;
+}
+
+/* MOBILE */
+@media(max-width:700px){
+
+  body{
+    padding:0;
+  }
+
+  .app{
+    height:100vh;
+    min-height:0;
+    border-radius:0;
+    border:0;
+  }
+
+  .sidebar{
+    display:none;
+  }
+
+  .header{
+    height:68px;
+    padding:0 14px;
+  }
+
+  .chat{
+    padding:16px 12px;
+  }
+
+  .welcome{
+    margin:40px auto 25px;
+  }
+
+  .welcome h1{
+    font-size:25px;
+  }
+
+  .welcome-icon{
+    font-size:45px;
+  }
+
+  .bubble{
+    max-width:82%;
+  }
+
+  .suggestions{
+    padding:0 12px 10px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+  }
+
+  .suggestion{
+    white-space:nowrap;
+  }
+
+  .input-area{
+    padding:10px;
+  }
+
+  .clear{
+    font-size:11px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <span>ANAS AI</span>
+    </div>
+
+    <button class="new-chat" onclick="newChat()">
+      ＋ New Chat
+    </button>
+
+    <div class="side-title">About</div>
+
+    <div class="info">
+      Your personal AI-style chat assistant.
+      Ask questions, generate ideas, learn something new,
+      or just have a conversation.
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="status">
+        <span class="dot"></span>
+        AI Online
+      </div>
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <header class="header">
+
+      <div class="ai-name">
+
+        <div class="ai-avatar">🤖</div>
+
+        <div>
+          <h2>ANAS AI</h2>
+          <span>Smart Assistant</span>
+        </div>
+
+      </div>
+
+      <button class="clear" onclick="clearChat()">
+        🧹 Clear
+      </button>
+
+    </header>
+
+
+    <!-- CHAT -->
+    <section class="chat" id="chat">
+
+      <div class="welcome" id="welcome">
+
+        <div class="welcome-icon">🤖</div>
+
+        <h1>How can I help?</h1>
+
+        <p>
+          Welcome to ANAS AI. Ask me anything or
+          choose one of the quick suggestions below.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- QUICK SUGGESTIONS -->
+    <div class="suggestions">
+
+      <button class="suggestion"
+        onclick="quickSend('Tell me an interesting fact')">
+        💡 Interesting fact
+      </button>
+
+      <button class="suggestion"
+        onclick="quickSend('Give me a game idea')">
+        🎮 Game idea
+      </button>
+
+      <button class="suggestion"
+        onclick="quickSend('Help me learn JavaScript')">
+        💻 Learn JavaScript
+      </button>
+
+      <button class="suggestion"
+        onclick="quickSend('Write a short story')">
+        ✍️ Write a story
+      </button>
+
+    </div>
+
+
+    <!-- INPUT -->
+    <div class="input-area">
+
+      <div class="input-box">
+
+        <textarea
+          id="input"
+          rows="1"
+          placeholder="Message ANAS AI..."
+          onkeydown="handleKey(event)"
+        ></textarea>
+
+        <button class="send" onclick="sendMessage()">
+          ➤
+        </button>
+
+      </div>
+
+      <div class="hint">
+        Press Enter to send · Shift + Enter for new line
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<script>
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const welcome = document.getElementById("welcome");
+
+
+// ENTER KEY
+function handleKey(event){
+
+  if(event.key === "Enter" && !event.shiftKey){
+
+    event.preventDefault();
+    sendMessage();
+
+  }
+
+}
+
+
+// QUICK BUTTON
+function quickSend(text){
+
+  input.value = text;
+  sendMessage();
+
+}
+
+
+// ADD MESSAGE
+function addMessage(type,text){
+
+  const message = document.createElement("div");
+
+  message.className = "message " + type;
+
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  avatar.textContent = type === "user" ? "👤" : "🤖";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.textContent = text;
+
+  message.appendChild(avatar);
+  message.appendChild(bubble);
+
+  chat.appendChild(message);
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
+
+// TYPING
+function showTyping(){
+
+  const message = document.createElement("div");
+
+  message.className = "message ai";
+  message.id = "typingMessage";
+
+  const avatar = document.createElement("div");
+
+  avatar.className = "avatar";
+  avatar.textContent = "🤖";
+
+  const bubble = document.createElement("div");
+
+  bubble.className = "bubble typing";
+
+  bubble.innerHTML =
+    "<span></span><span></span><span></span>";
+
+  message.appendChild(avatar);
+  message.appendChild(bubble);
+
+  chat.appendChild(message);
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
+
+// REMOVE TYPING
+function hideTyping(){
+
+  const typing = document.getElementById("typingMessage");
+
+  if(typing){
+    typing.remove();
+  }
+
+}
+
+
+// AI RESPONSE
+function generateResponse(text){
+
+  const msg = text.toLowerCase();
+
+  if(
+    msg.includes("hello") ||
+    msg.includes("hi") ||
+    msg.includes("hey")
+  ){
+
+    return "Hello! 👋 I'm ANAS AI. How can I help you today?";
+
+  }
+
+
+  if(msg.includes("game")){
+
+    return "🎮 Game idea:\n\nBuild a 3D-style racing game with cars, checkpoints, coins, opponents, boost pads and multiple levels.";
+
+  }
+
+
+  if(
+    msg.includes("javascript") ||
+    msg.includes("js")
+  ){
+
+    return "💻 JavaScript is a programming language used to make websites interactive. You can use it for games, animations, apps and much more.";
+
+  }
+
+
+  if(
+    msg.includes("fact") ||
+    msg.includes("interesting")
+  ){
+
+    return "🌍 Interesting fact: A day on Venus is longer than a year on Venus!";
+
+  }
+
+
+  if(
+    msg.includes("story") ||
+    msg.includes("write")
+  ){
+
+    return "📖 Once upon a time, a young coder discovered a mysterious AI hidden inside an old computer. The AI gave him one mission: build something nobody had ever seen before...";
+
+  }
+
+
+  if(
+    msg.includes("html") ||
+    msg.includes("website")
+  ){
+
+    return "🌐 HTML creates the structure of a webpage. CSS controls its appearance, while JavaScript adds interaction and functionality.";
+
+  }
+
+
+  if(
+    msg.includes("who are you") ||
+    msg.includes("your name")
+  ){
+
+    return "🤖 I'm ANAS AI — your browser-based AI-style assistant.";
+
+  }
+
+
+  const responses = [
+
+    "That's interesting! 🤔 Tell me a little more about it.",
+
+    "I understand. 💡 I can help you explore that idea.",
+
+    "Nice! 🚀 Let's turn that idea into something awesome.",
+
+    "Good question! 🤖 Here's a simple way to think about it.",
+
+    "Absolutely! ✨ We can build that step by step."
+
+  ];
+
+  return responses[
+    Math.floor(Math.random() * responses.length)
+  ];
+
+}
+
+
+// SEND MESSAGE
+function sendMessage(){
+
+  const text = input.value.trim();
+
+  if(!text) return;
+
+  if(welcome){
+    welcome.style.display = "none";
+  }
+
+  addMessage("user",text);
+
+  input.value = "";
+  input.style.height = "auto";
+
+  showTyping();
+
+  setTimeout(()=>{
+
+    hideTyping();
+
+    const response = generateResponse(text);
+
+    addMessage("ai",response);
+
+  },700 + Math.random()*700);
+
+}
+
+
+// CLEAR CHAT
+function clearChat(){
+
+  chat.innerHTML = `
+    <div class="welcome" id="welcome">
+
+      <div class="welcome-icon">🤖</div>
+
+      <h1>How can I help?</h1>
+
+      <p>
+        Welcome to ANAS AI. Ask me anything or
+        choose one of the quick suggestions below.
+      </p>
+
+    </div>
+  `;
+
+}
+
+
+// NEW CHAT
+function newChat(){
+
+  clearChat();
+
+  input.value = "";
+  input.focus();
+
+}
+
+
+// AUTO RESIZE TEXTAREA
+input.addEventListener("input",function(){
+
+  this.style.height = "auto";
+
+  this.style.height =
+    Math.min(this.scrollHeight,120) + "px";
+
+});
+
+
+// FOCUS INPUT
+window.addEventListener("load",()=>{
+
+  input.focus();
+
+});
+
+</script>
+
+</body>
+</html>
+```
